@@ -118,6 +118,7 @@ stocks.push(
 stocks.forEach(x=>{if(!x.type)x.type="Akcje";});
 const watch=new Set(["DEMO1","DEMO2","DEMO3","DEMO5","DEMO7","ETF-DEMO1","CRYPTO-BTC"]);
 let selected="DEMO1";
+let cryptoDataFresh=false;
 const $=id=>document.getElementById(id);
 function pct(v){return Number(v).toLocaleString("pl-PL",{maximumFractionDigits:1})+"%"}
 function visibleStocks(){let q=$("search").value.toLowerCase().trim(),t=$("type").value,m=$("market").value,s=$("style").value,sort=$("sort").value;
@@ -125,8 +126,8 @@ function visibleStocks(){let q=$("search").value.toLowerCase().trim(),t=$("type"
  list.sort((a,b)=>sort==="yield"?b.yield-a.yield:sort==="growth"?b.growth-a.growth:sort==="name"?a.name.localeCompare(b.name):b.score-a.score);
  return list}
 function renderRows(){let list=visibleStocks();$("countLabel").textContent=list.length+" wyników";$("totalCount").textContent=stocks.length;$("highCount").textContent=stocks.filter(x=>x.score>=80).length;$("watchCount").textContent=watch.size;
- if(!list.length){$("rows").innerHTML='<tr><td colspan="5" class="empty">Nie znaleziono spółek. Zmień wyszukiwanie lub filtry.</td></tr>';return}
- $("rows").innerHTML=list.map(x=>`<tr class="${x.ticker===selected?'selected':''}" data-ticker="${x.ticker}"><td><div class="company"><div class="ticker-icon">${x.type==="Krypto"?"₿":x.type==="ETF"?"E":x.ticker.slice(-1)}</div><div><div class="company-name">${x.name}</div><div class="company-meta">${x.ticker} · ${x.style}</div></div></div></td><td>${x.type} · ${x.market}</td><td class="live-number">${x.type==="Krypto"?(x.livePrice==null?'—':x.livePrice.toLocaleString("pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:x.livePrice<10?4:2})):'—'}</td><td class="${x.change24==null?'':x.change24>=0?'change-up':'change-down'}">${x.type==="Krypto"&&x.change24!=null?pctSigned(x.change24):'—'}</td><td><div class="score">${x.score}<span style="font-size:10px;color:var(--muted)">/100</span></div><div class="scorebar"><span style="width:${x.score}%"></span></div></td><td>${x.yield===0?'—':pct(x.yield)}</td><td><span class="badge ${x.signalType}">${x.signal}</span></td></tr>`).join("");
+ if(!list.length){$("rows").innerHTML='<tr><td colspan="7" class="empty">Nie znaleziono spółek. Zmień wyszukiwanie lub filtry.</td></tr>';return}
+ $("rows").innerHTML=list.map(x=>`<tr class="${x.ticker===selected?'selected':''}" data-ticker="${x.ticker}"><td><div class="company"><div class="ticker-icon">${x.type==="Krypto"?"₿":x.type==="ETF"?"E":x.ticker.slice(-1)}</div><div><div class="company-name">${x.name}</div><div class="company-meta">${x.ticker} · ${x.style}</div></div></div></td><td>${x.type} · ${x.market}</td><td class="live-number">${x.type==="Krypto"?(x.livePrice==null?'—':x.livePrice.toLocaleString("pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:x.livePrice<10?4:2})+(cryptoDataFresh?'':' <span style="color:var(--yellow);font-size:10px">⚠ możliwie nieaktualna</span>')):'—'}</td><td class="${x.change24==null?'':x.change24>=0?'change-up':'change-down'}">${x.type==="Krypto"&&x.change24!=null?pctSigned(x.change24):'—'}</td><td><div class="score">${x.score}<span style="font-size:10px;color:var(--muted)">/100</span></div><div class="scorebar"><span style="width:${x.score}%"></span></div></td><td>${x.yield===0?'—':pct(x.yield)}</td><td><span class="badge ${x.signalType}">${x.signal}</span></td></tr>`).join("");
  document.querySelectorAll("#rows tr[data-ticker]").forEach(tr=>tr.addEventListener("click",()=>{selected=tr.dataset.ticker;renderRows();renderDetail()}))}
 function renderDetail(){let x=stocks.find(a=>a.ticker===selected)||stocks[0];$("detail").innerHTML=`<div class="detail-top"><div><div class="detail-name">${x.name}</div><div class="detail-ticker">${x.ticker} · ${x.type||"Akcje"} · ${x.exchange} · ${x.market}</div></div><div style="text-align:right"><div class="detail-score">${x.score}/100</div><span class="badge ${x.signalType}">${x.signal}</span></div></div>
  <div class="detail-grid"><div class="mini"><span>${x.type==="Krypto"?"Cena bieżąca (PLN)":"Modelowy wzrost"}</span><strong>${x.type==="Krypto"?(x.livePrice==null?"Ładowanie…":x.livePrice.toLocaleString("pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:x.livePrice<10?4:2})):pct(x.growth)}</strong></div><div class="mini"><span>${x.type==="Krypto"?"Zmiana 24 h":"Stopa dywidendy*"}</span><strong>${x.type==="Krypto"?(x.change24==null?"—":pctSigned(x.change24)):(x.yield?pct(x.yield):"—")}</strong></div><div class="mini"><span>${x.type==="Krypto"?"Zmiana 7 dni":"Profil"}</span><strong>${x.type==="Krypto"?(x.change7==null?"—":pctSigned(x.change7)):x.style}</strong></div></div>
@@ -135,6 +136,11 @@ function renderDetail(){let x=stocks.find(a=>a.ticker===selected)||stocks[0];$("
  $("watchToggle").addEventListener("click",()=>{if(watch.has(x.ticker))watch.delete(x.ticker);else watch.add(x.ticker);renderRows();renderDetail();renderWatch()})}
 function renderWatch(){let list=stocks.filter(x=>watch.has(x.ticker)).sort((a,b)=>b.score-a.score);$("watchlist").innerHTML=list.length?list.map(x=>`<div class="watch-item"><div><div class="watch-name">${x.name}</div><div class="watch-sub">${x.ticker} · ${x.market}</div></div><div class="watch-score">${x.score}/100</div></div>`).join(""):'<div class="sub">Lista jest pusta. Dodaj spółkę z rankingu.</div>';document.querySelectorAll("#watchCount").forEach(e=>e.textContent=watch.size)}
 function pctSigned(v){return (v>0?"+":"")+Number(v).toLocaleString("pl-PL",{maximumFractionDigits:2})+"%"}
+function formatSourceTime(value){
+ if(!value)return null;
+ const date=new Date(value);
+ return Number.isNaN(date.getTime())?null:date.toLocaleString("pl-PL");
+}
 async function refreshCrypto(){
  const label=$("liveLabel"),note=$("liveNote"),button=$("refreshLive");
  label.textContent="Dane rynkowe: pobieranie…";label.className="";
@@ -145,24 +151,38 @@ async function refreshCrypto(){
    if(!response.ok) throw new Error("API odpowiedziało kodem "+response.status);
    const data=await response.json();
    if(!Array.isArray(data)||data.length===0) throw new Error("Brak danych w odpowiedzi API");
-   for(const item of data){
-     const stock=stocks.find(x=>x.cgId===item.id);
-     if(stock){
-       stock.livePrice=Number.isFinite(item.current_price)?item.current_price:null;
-       stock.change24=Number.isFinite(item.price_change_percentage_24h_in_currency)?item.price_change_percentage_24h_in_currency:(Number.isFinite(item.price_change_percentage_24h)?item.price_change_percentage_24h:null);
-       stock.change7=Number.isFinite(item.price_change_percentage_7d_in_currency)?item.price_change_percentage_7d_in_currency:(Number.isFinite(item.price_change_percentage_7d)?item.price_change_percentage_7d:null);
-       stock.lastUpdated=item.last_updated||null;
-     }
+
+   // Validate both assets and their prices before changing any displayed values.
+   const requiredIds=["bitcoin","ethereum"];
+   const items=requiredIds.map(id=>data.find(item=>item.id===id));
+   if(items.some(item=>!item||!Number.isFinite(item.current_price)||item.current_price<=0)){
+     throw new Error("API nie zwróciło prawidłowych cen BTC i ETH");
    }
-   const missing=stocks.filter(x=>x.cgId&&!data.some(d=>d.id===x.cgId));
-   if(missing.length) throw new Error("API nie zwróciło wszystkich aktywów");
+
+   for(const item of items){
+     const stock=stocks.find(x=>x.cgId===item.id);
+     if(!stock)continue;
+     stock.livePrice=item.current_price;
+     stock.change24=Number.isFinite(item.price_change_percentage_24h_in_currency)?item.price_change_percentage_24h_in_currency:(Number.isFinite(item.price_change_percentage_24h)?item.price_change_percentage_24h:null);
+     stock.change7=Number.isFinite(item.price_change_percentage_7d_in_currency)?item.price_change_percentage_7d_in_currency:(Number.isFinite(item.price_change_percentage_7d)?item.price_change_percentage_7d:null);
+     stock.lastUpdated=item.last_updated||null;
+   }
+
+   cryptoDataFresh=true;
    const now=new Date();
+   const btc=items.find(item=>item.id==="bitcoin");
+   const eth=items.find(item=>item.id==="ethereum");
+   const btcTime=formatSourceTime(btc.last_updated);
+   const ethTime=formatSourceTime(eth.last_updated);
    label.textContent="Ceny BTC i ETH: pobrane z CoinGecko";
-   note.textContent="Ostatnie pobranie: "+now.toLocaleString("pl-PL")+". Ceny rynkowe; ranking i sygnały nadal demonstracyjne. Źródło: CoinGecko.";
+   note.textContent="Pobrano: "+now.toLocaleString("pl-PL")+
+     (btcTime||ethTime?" · Aktualizacja źródła — BTC: "+(btcTime||"brak informacji")+"; ETH: "+(ethTime||"brak informacji"):"")+
+     ". Zmiana 7-dniowa może być niedostępna (wtedy pokazujemy „—”). Ranking i sygnały nadal demonstracyjne.";
  }catch(err){
+   cryptoDataFresh=false;
    label.textContent="Ceny na żywo niedostępne";
    label.className="warn";
-   note.textContent="Nie udało się pobrać cen (możliwy limit API lub ograniczenie połączenia). Dane demo pozostają widoczne. Spróbuj ponownie później.";
+   note.textContent="Nie udało się teraz pobrać i potwierdzić cen BTC oraz ETH. Wyświetlane wcześniej ceny pozostają zachowane, ale są oznaczone jako potencjalnie nieaktualne. Spróbuj ponownie później.";
  }finally{
    button.disabled=false;button.textContent="↻ Odśwież ceny";
    renderRows();renderDetail();
