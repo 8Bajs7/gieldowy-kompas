@@ -22,13 +22,13 @@ button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1250px;mar
 <div class="app">
   <header class="top">
     <div class="brand"><div class="logo">K</div><div><h1>Giełdowy Kompas</h1><p>Twój osobisty asystent inwestycyjny</p></div></div>
-    <div class="demo">● TRYB DEMO</div>
+    <div class="demo">● DANE MIESZANE</div>
   </header>
   <section class="hero">
     <div class="hero-main">
       <div class="eyebrow">Panel inwestora · wersja 0.1</div>
       <h2>Decyzje oparte na danych.<br>Nie na przeczuciach.</h2>
-      <p>Wyszukuj spółki, porównuj ich ocenę i obserwuj potencjalne sygnały. Ten prototyp używa wyłącznie fikcyjnych danych demonstracyjnych.</p>
+      <p>Wyszukuj instrumenty i porównuj przykładowe oceny. Ceny BTC/ETH oraz wybranych akcji USA pobieramy z zewnętrznych API; pozostałe dane i punktacja są demonstracyjne.</p>
       <div class="pill-row"><span class="pill">Polska</span><span class="pill">USA</span><span class="pill">Rynki globalne</span><span class="pill">Wzrost + dywidendy</span></div>
     </div>
     <div class="hero-side">
@@ -37,11 +37,11 @@ button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1250px;mar
     </div>
   </section>
   <div class="live-status" role="status" aria-live="polite">
-    <div><strong id="liveLabel">Dane rynkowe: łączenie…</strong><div id="liveNote" style="color:var(--muted);margin-top:3px">Ceny BTC i ETH pobierane z publicznego API CoinGecko. Punktacja instrumentów nadal jest demonstracyjna.</div></div>
+    <div><strong id="liveLabel">Krypto: łączenie…</strong><div id="liveNote" style="color:var(--muted);margin-top:3px">Ceny BTC i ETH z CoinGecko. Punktacja nadal jest demonstracyjna.</div><div id="usLiveNote" style="color:var(--muted);margin-top:5px">Akcje USA: oczekiwanie na Twelve Data…</div></div>
     <button id="refreshLive" class="refresh-btn" type="button">↻ Odśwież ceny</button>
   </div>
   <section class="metrics">
-    <div class="metric"><div class="label">Instrumenty w demonstracji</div><div class="value" id="totalCount">17</div><div class="detail">Akcje, ETF-y i krypto</div></div>
+    <div class="metric"><div class="label">Instrumenty w rankingu</div><div class="value" id="totalCount">20</div><div class="detail">Część cen pobierana z API</div></div>
     <div class="metric"><div class="label">Wysoka ocena modelu</div><div class="value" id="highCount">4</div><div class="detail">80 punktów lub więcej</div></div>
     <div class="metric"><div class="label">Na liście obserwowanych</div><div class="value" id="watchCount">7</div><div class="detail">Przykładowa lista</div></div>
     <div class="metric"><div class="label">Dane rynkowe</div><div class="value" style="font-size:19px;color:var(--yellow)">MIX</div><div class="detail">Krypto: próba danych na żywo</div></div>
@@ -57,7 +57,7 @@ button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1250px;mar
           <select id="sort" class="field" aria-label="Sortowanie"><option value="score">Najwyższa ocena</option><option value="yield">Najwyższa dywidenda</option><option value="growth">Najwyższy wzrost</option><option value="name">Nazwa A–Z</option></select>
           <span class="count" id="countLabel">12 wyników</span>
         </div>
-        <div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Typ / rynek</th><th>Cena (PLN)</th><th>24 h</th><th>Ocena demo</th><th>Dywidenda*</th><th>Sygnał modelu</th></tr></thead><tbody id="rows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Typ / rynek</th><th>Cena / waluta</th><th>24 h</th><th>Ocena demo</th><th>Dywidenda*</th><th>Sygnał modelu</th></tr></thead><tbody id="rows"></tbody></table></div>
       </section>
       <section class="panel detail-panel" id="detailPanel">
         <div class="panel-head"><div><h3>Szczegóły oceny</h3><div class="sub">Wyjaśnienie punktacji wybranej spółki.</div></div><span class="badge b-yellow">Dane fikcyjne</span></div>
@@ -90,7 +90,7 @@ button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1250px;mar
       </section>
     </aside>
   </div>
-  <div class="footer">Giełdowy Kompas · prototyp demonstracyjny · brak połączenia z giełdą, API i rachunkiem maklerskim.</div>
+  <div class="footer">Giełdowy Kompas · prototyp demonstracyjny. Ceny z API mogą być opóźnione; punktacja i sygnały nie są poradą inwestycyjną.</div>
 </div>
 <script>
 const stocks=[
@@ -105,7 +105,10 @@ const stocks=[
  {ticker:"DEMO9",name:"Silverline Utilities",market:"USA",exchange:"NYSE · fikcyjna",style:"Dywidenda",score:69,yield:4.5,growth:3.5,quality:20,growthPts:9,value:15,div:19,momentum:6,signal:"Monitoruj",signalType:"b-yellow",reason:["Modelowo wysoka dywidenda.","Niski wzrost i słabszy trend.","Sprawdź zadłużenie oraz wrażliwość na stopy procentowe."]},
  {ticker:"DEMO10",name:"Polaris Materials",market:"Polska",exchange:"GPW · fikcyjna",style:"Mieszany",score:64,yield:2.7,growth:6.4,quality:16,growthPts:12,value:13,div:14,momentum:9,signal:"Monitoruj",signalType:"b-yellow",reason:["Ocena mieszana.","Brak wyraźnej przewagi w modelu.","Warto porównać z konkurentami."]},
  {ticker:"DEMO11",name:"Redwood Mobility",market:"USA",exchange:"NASDAQ · fikcyjna",style:"Wzrost",score:58,yield:0,growth:10.5,quality:14,growthPts:14,value:8,div:0,momentum:22,signal:"Podwyższone ryzyko",signalType:"b-red",reason:["Trend nie równoważy słabszej oceny jakości i wyceny.","W modelu brakuje dywidendy.","Potrzebna szczegółowa analiza finansowania i marż."]},
- {ticker:"DEMO12",name:"Continental Brands",market:"Globalny",exchange:"Global · fikcyjna",style:"Dywidenda",score:54,yield:6.2,growth:1.2,quality:13,growthPts:6,value:13,div:20,momentum:2,signal:"Podwyższone ryzyko",signalType:"b-red",reason:["Bardzo wysoka stopa dywidendy może być ostrzeżeniem.","Słaby trend i niski wzrost.","Nie zakładaj, że obecna wypłata będzie utrzymana."]}
+ {ticker:"DEMO12",name:"Continental Brands",market:"Globalny",exchange:"Global · fikcyjna",style:"Dywidenda",score:54,yield:6.2,growth:1.2,quality:13,growthPts:6,value:13,div:20,momentum:2,signal:"Podwyższone ryzyko",signalType:"b-red",reason:["Bardzo wysoka stopa dywidendy może być ostrzeżeniem.","Słaby trend i niski wzrost.","Nie zakładaj, że obecna wypłata będzie utrzymana."]},
+ {ticker:"AAPL",name:"Apple",market:"USA",exchange:"NASDAQ · Twelve Data",style:"Wzrost",liveSymbol:"AAPL",priceCurrency:"USD",livePrice:null,priceFetchedAt:null,score:70,yield:0,growth:0,quality:0,growthPts:0,value:0,div:0,momentum:0,signal:"Cena z API",signalType:"b-green",reason:["Cena pobierana z Twelve Data.","Punktacja, wzrost i dywidenda w tej wersji są demonstracyjne.","Dostępność i opóźnienie notowań zależą od planu dostawcy."]},
+ {ticker:"MSFT",name:"Microsoft",market:"USA",exchange:"NASDAQ · Twelve Data",style:"Wzrost",liveSymbol:"MSFT",priceCurrency:"USD",livePrice:null,priceFetchedAt:null,score:70,yield:0,growth:0,quality:0,growthPts:0,value:0,div:0,momentum:0,signal:"Cena z API",signalType:"b-green",reason:["Cena pobierana z Twelve Data.","Punktacja, wzrost i dywidenda w tej wersji są demonstracyjne.","Dostępność i opóźnienie notowań zależą od planu dostawcy."]},
+ {ticker:"NVDA",name:"NVIDIA",market:"USA",exchange:"NASDAQ · Twelve Data",style:"Wzrost",liveSymbol:"NVDA",priceCurrency:"USD",livePrice:null,priceFetchedAt:null,score:70,yield:0,growth:0,quality:0,growthPts:0,value:0,div:0,momentum:0,signal:"Cena z API",signalType:"b-green",reason:["Cena pobierana z Twelve Data.","Punktacja, wzrost i dywidenda w tej wersji są demonstracyjne.","Dostępność i opóźnienie notowań zależą od planu dostawcy."]}
 ];
 // Dodatkowe instrumenty są fikcyjne i służą wyłącznie do demonstracji interfejsu.
 stocks.push(
@@ -127,10 +130,10 @@ function visibleStocks(){let q=$("search").value.toLowerCase().trim(),t=$("type"
  return list}
 function renderRows(){let list=visibleStocks();$("countLabel").textContent=list.length+" wyników";$("totalCount").textContent=stocks.length;$("highCount").textContent=stocks.filter(x=>x.score>=80).length;$("watchCount").textContent=watch.size;
  if(!list.length){$("rows").innerHTML='<tr><td colspan="7" class="empty">Nie znaleziono spółek. Zmień wyszukiwanie lub filtry.</td></tr>';return}
- $("rows").innerHTML=list.map(x=>`<tr class="${x.ticker===selected?'selected':''}" data-ticker="${x.ticker}"><td><div class="company"><div class="ticker-icon">${x.type==="Krypto"?"₿":x.type==="ETF"?"E":x.ticker.slice(-1)}</div><div><div class="company-name">${x.name}</div><div class="company-meta">${x.ticker} · ${x.style}</div></div></div></td><td>${x.type} · ${x.market}</td><td class="live-number">${x.type==="Krypto"?(x.livePrice==null?'—':x.livePrice.toLocaleString("pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:x.livePrice<10?4:2})+(cryptoDataFresh?'':' <span style="color:var(--yellow);font-size:10px">⚠ możliwie nieaktualna</span>')):'—'}</td><td class="${x.change24==null?'':x.change24>=0?'change-up':'change-down'}">${x.type==="Krypto"&&x.change24!=null?pctSigned(x.change24):'—'}</td><td><div class="score">${x.score}<span style="font-size:10px;color:var(--muted)">/100</span></div><div class="scorebar"><span style="width:${x.score}%"></span></div></td><td>${x.yield===0?'—':pct(x.yield)}</td><td><span class="badge ${x.signalType}">${x.signal}</span></td></tr>`).join("");
+ $("rows").innerHTML=list.map(x=>`<tr class="${x.ticker===selected?'selected':''}" data-ticker="${x.ticker}"><td><div class="company"><div class="ticker-icon">${x.type==="Krypto"?"₿":x.type==="ETF"?"E":x.liveSymbol?"$":x.ticker.slice(-1)}</div><div><div class="company-name">${x.name}</div><div class="company-meta">${x.ticker} · ${x.style}</div></div></div></td><td>${x.type} · ${x.market}</td><td class="live-number">${x.type==="Krypto"?(x.livePrice==null?'—':x.livePrice.toLocaleString("pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:x.livePrice<10?4:2})+(cryptoDataFresh?'':' <span style="color:var(--yellow);font-size:10px">⚠ możliwie nieaktualna</span>')):(x.priceCurrency==="USD"?(x.livePrice==null?'—':x.livePrice.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2})):'—')}</td><td class="${x.change24==null?'':x.change24>=0?'change-up':'change-down'}">${x.type==="Krypto"&&x.change24!=null?pctSigned(x.change24):'—'}</td><td><div class="score">${x.score}<span style="font-size:10px;color:var(--muted)">/100</span></div><div class="scorebar"><span style="width:${x.score}%"></span></div></td><td>${x.yield===0?'—':pct(x.yield)}</td><td><span class="badge ${x.signalType}">${x.signal}</span></td></tr>`).join("");
  document.querySelectorAll("#rows tr[data-ticker]").forEach(tr=>tr.addEventListener("click",()=>{selected=tr.dataset.ticker;renderRows();renderDetail()}))}
 function renderDetail(){let x=stocks.find(a=>a.ticker===selected)||stocks[0];$("detail").innerHTML=`<div class="detail-top"><div><div class="detail-name">${x.name}</div><div class="detail-ticker">${x.ticker} · ${x.type||"Akcje"} · ${x.exchange} · ${x.market}</div></div><div style="text-align:right"><div class="detail-score">${x.score}/100</div><span class="badge ${x.signalType}">${x.signal}</span></div></div>
- <div class="detail-grid"><div class="mini"><span>${x.type==="Krypto"?"Cena bieżąca (PLN)":"Modelowy wzrost"}</span><strong>${x.type==="Krypto"?(x.livePrice==null?"Ładowanie…":x.livePrice.toLocaleString("pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:x.livePrice<10?4:2})):pct(x.growth)}</strong></div><div class="mini"><span>${x.type==="Krypto"?"Zmiana 24 h":"Stopa dywidendy*"}</span><strong>${x.type==="Krypto"?(x.change24==null?"—":pctSigned(x.change24)):(x.yield?pct(x.yield):"—")}</strong></div><div class="mini"><span>${x.type==="Krypto"?"Zmiana 7 dni":"Profil"}</span><strong>${x.type==="Krypto"?(x.change7==null?"—":pctSigned(x.change7)):x.style}</strong></div></div>
+ <div class="detail-grid"><div class="mini"><span>${x.type==="Krypto"?"Cena (PLN)":x.priceCurrency==="USD"?"Cena z API (USD)":"Modelowy wzrost"}</span><strong>${x.type==="Krypto"?(x.livePrice==null?"Ładowanie…":x.livePrice.toLocaleString("pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:x.livePrice<10?4:2})):x.priceCurrency==="USD"?(x.livePrice==null?"Oczekiwanie…":x.livePrice.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2})):pct(x.growth)}</strong></div><div class="mini"><span>${x.type==="Krypto"?"Zmiana 24 h":x.priceCurrency==="USD"?"Źródło":"Stopa dywidendy*"}</span><strong>${x.type==="Krypto"?(x.change24==null?"—":pctSigned(x.change24)):x.priceCurrency==="USD"?"Twelve Data":(x.yield?pct(x.yield):"—")}</strong></div><div class="mini"><span>${x.type==="Krypto"?"Zmiana 7 dni":x.priceCurrency==="USD"?"Pobrano":"Profil"}</span><strong>${x.type==="Krypto"?(x.change7==null?"—":pctSigned(x.change7)):x.priceCurrency==="USD"?(x.priceFetchedAt?formatSourceTime(x.priceFetchedAt):"—"):x.style}</strong></div></div>
  <div class="why"><strong>Co wpłynęło na ocenę demonstracyjną?</strong><ul><li>Jakość biznesu: ${x.quality}/25 pkt</li><li>Wzrost wyników: ${x.growthPts}/20 pkt</li><li>Atrakcyjność wyceny: ${x.value}/20 pkt</li><li>Dywidendy: ${x.div}/20 pkt</li><li>Trend cenowy: ${x.momentum}/15 pkt</li></ul><strong>Przykładowa interpretacja</strong><ul>${x.reason.map(r=>`<li>${r}</li>`).join("")}</ul></div>
  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:13px"><button id="watchToggle" class="field" style="background:${watch.has(x.ticker)?'#1b3925':'#0c130f'};border-color:${watch.has(x.ticker)?'#3b9b65':'var(--line)'};color:var(--text)">${watch.has(x.ticker)?"✓ Na liście obserwowanych":"+ Dodaj do obserwowanych"}</button><span class="sub" style="align-self:center">* Stopa dywidendy wyłącznie demonstracyjna.</span></div>`;
  $("watchToggle").addEventListener("click",()=>{if(watch.has(x.ticker))watch.delete(x.ticker);else watch.add(x.ticker);renderRows();renderDetail();renderWatch()})}
@@ -142,9 +145,8 @@ function formatSourceTime(value){
  return Number.isNaN(date.getTime())?null:date.toLocaleString("pl-PL");
 }
 async function refreshCrypto(){
- const label=$("liveLabel"),note=$("liveNote"),button=$("refreshLive");
- label.textContent="Dane rynkowe: pobieranie…";label.className="";
- button.disabled=true;button.textContent="Pobieranie…";
+ const label=$("liveLabel"),note=$("liveNote");
+ label.textContent="Krypto: pobieranie…";label.className="";
  try{
    const url="https://api.coingecko.com/api/v3/coins/markets?vs_currency=pln&ids=bitcoin%2Cethereum&price_change_percentage=24h%2C7d";
    const response=await fetch(url,{headers:{accept:"application/json"},cache:"no-store"});
@@ -174,23 +176,56 @@ async function refreshCrypto(){
    const eth=items.find(item=>item.id==="ethereum");
    const btcTime=formatSourceTime(btc.last_updated);
    const ethTime=formatSourceTime(eth.last_updated);
-   label.textContent="Ceny BTC i ETH: pobrane z CoinGecko";
+   label.textContent="Krypto: ceny BTC i ETH pobrane z CoinGecko";
    note.textContent="Pobrano: "+now.toLocaleString("pl-PL")+
      (btcTime||ethTime?" · Aktualizacja źródła — BTC: "+(btcTime||"brak informacji")+"; ETH: "+(ethTime||"brak informacji"):"")+
      ". Zmiana 7-dniowa może być niedostępna (wtedy pokazujemy „—”). Ranking i sygnały nadal demonstracyjne.";
  }catch(err){
    cryptoDataFresh=false;
-   label.textContent="Ceny na żywo niedostępne";
+   label.textContent="Krypto: ceny niedostępne";
    label.className="warn";
    note.textContent="Nie udało się teraz pobrać i potwierdzić cen BTC oraz ETH. Wyświetlane wcześniej ceny pozostają zachowane, ale są oznaczone jako potencjalnie nieaktualne. Spróbuj ponownie później.";
  }finally{
-   button.disabled=false;button.textContent="↻ Odśwież ceny";
    renderRows();renderDetail();
  }
 }
+
+async function refreshUSStocks(){
+ const status=$("usLiveNote");
+ const liveStocks=stocks.filter(x=>x.liveSymbol);
+ status.textContent="Akcje USA: pobieranie cen z Twelve Data…";
+ let successes=0;
+ for(const stock of liveStocks){
+   try{
+     const endpoint="https://gieldowy-kompas-api.lukasweihs.workers.dev/price?symbol="+encodeURIComponent(stock.liveSymbol);
+     const response=await fetch(endpoint,{headers:{accept:"application/json"},cache:"no-store"});
+     const data=await response.json();
+     if(!response.ok||!Number.isFinite(Number(data.price))||data.symbol!==stock.liveSymbol) throw new Error("Invalid quote");
+     stock.livePrice=Number(data.price);
+     stock.priceFetchedAt=data.retrievedAt||new Date().toISOString();
+     successes++;
+   }catch(err){
+     // Keep any previously fetched quote; do not replace it with demo data.
+   }
+ }
+ if(successes===liveStocks.length){
+   status.textContent="Akcje USA: ceny pobrane z Twelve Data · " + formatSourceTime(new Date().toISOString()) + ". Notowania mogą być opóźnione; oceny nadal demonstracyjne.";
+ }else if(successes>0){
+   status.textContent="Akcje USA: pobrano część cen z Twelve Data. Niektóre ceny mogą być niedostępne; oceny nadal demonstracyjne.";
+ }else{
+   status.textContent="Akcje USA: nie udało się pobrać cen. Sprawdź połączenie i spróbuj ponownie; oceny nadal demonstracyjne.";
+ }
+}
+async function refreshAllLiveData(){
+ const button=$("refreshLive");
+ button.disabled=true;button.textContent="Pobieranie…";
+ try{ await Promise.all([refreshCrypto(),refreshUSStocks()]); }
+ finally{ button.disabled=false;button.textContent="↻ Odśwież ceny";renderRows();renderDetail(); }
+}
+
 ["search","type","market","style","sort"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",renderRows));
-$("refreshLive").addEventListener("click",refreshCrypto);
-renderRows();renderDetail();renderWatch();refreshCrypto();
+$("refreshLive").addEventListener("click",refreshAllLiveData);
+renderRows();renderDetail();renderWatch();refreshAllLiveData();
 </script>
 </body>
 </html>
